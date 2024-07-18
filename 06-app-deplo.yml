@@ -54,7 +54,7 @@ metadata:
       name: spring-mysql-app
 spec:
    selector:
-         app: webapp
+         app: spring-app-pod
    type: NodePort
    ports:
        - protocol: "TCP"
