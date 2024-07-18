@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-db
+  labels:
+      app: mysqldb
+spec:
+     replicas: 1
+     selector:
+         matchLabels:
+              app: mydb-pod
+     template:
+          metadata:
+               name: mysql-db
+               labels:
+                  app: mydb-pod
+          spec:
+              volumes:
+                 - name: mysql-db-volume
+                   persistentVolumeClaim:
+                         claimName: my-pvc
+              containers:
+                 - name: mysql-db-container
+                   image: mysql
+                   volumeMounts:
+                      - name: mysql-db-volume
+                        mountPath: /opt/mysql 
+                   ports:
+                      - containerPort: 3306
+                   env:
+                     - name: MYSQL_ROOT_PASSWORD
+                       valueFrom:
+                          secretKeyRef:
+                             name: my-secret
+                             key: DB_PASSWORD
+                     - name: MYSQL_DATABASE 
+                       valueFrom:
+                           configMapKeyRef:
+                                 name: my-configmap
+                                 key: DB_SCHEMA    
+---
+apiVersion: v1
+kind: Service
+metadata:
+     name: mysql-db-service
+spec:
+   type: ClusterIP
+   selector:
+        app: mysqldb
+   ports:
+      - port: 3306
+        targetPort: 3306
+        protocol: TCP
+             
+
